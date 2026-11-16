@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MLBB Mod Menu</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; font-family: 'Rajdhani', sans-serif; }
+
+    body {
+        background-color: #050508;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        /* Background ala game / abstract */
+        background-image: 
+            radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 100% 100%, rgba(213, 0, 255, 0.15) 0%, transparent 50%);
+    }
+
+    /* Container Menu */
+    .menu-panel {
+        width: 320px;
+        background: rgba(10, 10, 15, 0.75);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Garis Estetik Atas */
+    .menu-panel::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 2px;
+        background: linear-gradient(90deg, transparent, #00f0ff, #d500ff, transparent);
+        z-index: 10;
+    }
+
+    /* Header */
+    .header {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Logo SVG */
+    .logo-icon {
+        width: 24px;
+        height: 24px;
+        fill: none;
+        stroke: #00f0ff;
+        stroke-width: 2;
+        filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.5));
+    }
+
+    .title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    .title span { color: #00f0ff; }
+
+    /* Status Indikator */
+    .status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #00ff66;
+        letter-spacing: 1px;
+    }
+    .status-dot {
+        width: 6px; height: 6px;
+        background: #00ff66;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #00ff66;
+        animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Menu List */
+    .menu-content {
+        padding: 12px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .menu-content::-webkit-scrollbar { width: 3px; }
+    .menu-content::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 3px; }
+
+    /* Item Row */
+    .menu-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        transition: 0.2s;
+    }
+    .menu-item:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(0, 240, 255, 0.2); }
+
+    .item-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Ikon per fitur */
+    .item-icon {
+        width: 20px; height: 20px;
+        fill: none;
+        stroke: #888;
+        stroke-width: 2;
+        transition: 0.3s;
+    }
+
+    .item-text {
+        display: flex;
+        flex-direction: column;
+    }
+    .item-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #ddd;
+        letter-spacing: 1px;
+    }
+    .item-desc {
+        font-size: 10px;
+        color: #666;
+        margin-top: 1px;
+    }
+
+    /* Toggle Switch Custom */
+    .switch {
+        position: relative;
+        width: 36px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: .3s;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px; width: 14px;
+        left: 3px; bottom: 2px;
+        background-color: #888;
+        transition: .3s;
+        border-radius: 50%;
+    }
+    
+    /* Warna Toggle Kalau Nyala */
+    input:checked + .slider { background-color: rgba(0, 240, 255, 0.2); border-color: #00f0ff; box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.3); }
+    input:checked + .slider:before { transform: translateX(16px); background-color: #00f0ff; box-shadow: 0 0 8px #00f0ff; }
+    
+    /* Ikon Nyala kalau di-check */
+    input:checked ~ .item-icon { stroke: #00f0ff; filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.5)); }
+
+    /* Bagian Bawah / Footer */
+    .footer {
+        padding: 12px;
+        text-align: center;
+        font-size: 10px;
+        color: #444;
+        letter-spacing: 2px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+</style>
+</head>
+<body>
+
+<div class="menu-panel">
+    <div class="header">
+        <div class="logo-area">
+            <!-- Logo Hexagon Futuristik -->
+            <svg class="logo-icon" viewBox="0 0 24 24">
+                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                <line x1="12" y1="22" x2="12" y2="12"></line>
+                <line x1="22" y1="8.5" x2="12" y2="12"></line>
+                <line x1="2" y1="8.5" x2="12" y2="12"></line>
+            </svg>
+            <div class="title">NULL<span>MENU</span></div>
+        </div>
+        <div class="status"><div class="status-dot"></div>UNDETECTED</div>
+    </div>
+
+    <div class="menu-content">
+        
+        <!-- Fitur 1: Map Hack (Default ON) -->
+        <label class="menu-item">
+            <div class="item-info">
+                <!-- Ikon Map -->
+                <svg class="item-icon" viewBox="0 0 24 24">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                    <line x1="8" y1="2" x2="8" y2="18"></line>
+                    <line x1="16" y1="6" x2="16" y2="22"></line>
+                </svg>
+                <div class="item-text">
+                    <span class="item-name">MAP HACK</span>
+                    <span class="item-desc">Lihat seluruh map & musuh</span>
+                </div>
+            </div>
+            <div class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+            </div>
+        </label>
+
+        <!-- Fitur 2: Drone View -->
+        <label class="menu-item">
+            <div class="item-info">
+                <!-- Ikon Camera -->
+                <svg class="item-icon" viewBox="0 0 24 24">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <div class="item-text">
+                    <span class="item-name">DRONE VIEW</span>
+                    <span class="item-desc">Kamera dari atas (Height)</span>
+                </div>
+            </div>
+            <div class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </div>
+        </label>
+
+        <!-- Fitur 3: ESP Line -->
+        <label class="menu-item">
+            <div class="item-info">
+                <!-- Ikon Target -->
+                <svg class="item-icon" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="6"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                </svg>
+                <div class="item-text">
+                    <span class="item-name">ESP LINE</span>
+                    <span class="item-desc">Garis penunjuk arah musuh</span>
+                </div>
+            </div>
+            <div class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+            </div>
+        </label>
+
+        <!-- Fitur 4: Aimbot -->
+        <label class="menu-item">
+            <div class="item-info">
+                <!-- Ikon Crosshair -->
+                <svg class="item-icon" viewBox="0 0 24 24">
+                    <line x1="12" y1="2" x2="12" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <circle cx="12" cy="12" r="4"></circle>
+                </svg>
+                <div class="item-text">
+                    <span class="item-name">AUTO AIM</span>
+                    <span class="item-desc">Kunci target ke kepala</span>
+                </div>
+            </div>
+            <div class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </div>
+        </label>
+
+        <!-- Fitur 5: Unlock Skin -->
+        <label class="menu-item">
+            <div class="item-info">
+                <!-- Ikon Star / Skin -->
+                <svg class="item-icon" viewBox="0 0 24 24">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                <div class="item-text">
+                    <span class="item-name">UNLOCK SKIN</span>
+                    <span class="item-desc">Buka semua skin hero</span>
+                </div>
+            </div>
+            <div class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </div>
+        </label>
+
+        <!-- Fitur 6: Anti-Ban -->
+        <label class="menu-item">
+            <div class="item-info">
+                <!-- Ikon Shield -->
+                <svg class="item-icon" viewBox="0 0 24 24">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <div class="item-text">
+                    <span class="item-name">ANTI-BAN</span>
+                    <span class="item-desc">Bypass sistem keamanan</span>
+                </div>
+            </div>
+            <div class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+            </div>
+        </label>
+
+    </div>
+
+    <div class="footer">
+        v1.0.4 // SECURE CONNECTION
+    </div>
+</div>
+
+</body>
+  </html>
